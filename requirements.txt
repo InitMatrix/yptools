@@ -1,0 +1,7 @@
+beautifulsoup4==4.11.1
+bs4==0.0.1
+pywebio==1.7.0
+soupsieve==2.3.2.post1
+tornado==6.2
+ua-parser==0.16.1
+user-agents==2.2.0
