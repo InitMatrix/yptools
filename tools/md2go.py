@@ -3,7 +3,7 @@
 # Name:         a 
 # Author:       yepeng
 # Date:         2021/10/22 2:44 下午
-# Description: 
+# Description: 合约开发者提供事件归纳文档，本工具将md文件转化成对应的go文件 ，极大的减少重复代码开发时间
 # -------------------------------------------------------------------------------
 import pywebio.input
 from pywebio.output import *
@@ -122,7 +122,7 @@ class MarkDownParser(object):
         )
         if len(values) != len(value_types):
             raise Exception(
-                f"{group_name} {event_name}解析失败:\nvalues:{values}\nvalue_types{value_types}\nremarks{remarks}")
+                f"结构体解析失败:group:{group_name}\n event:{event_name}\nvalues:{values}\nvalue_types{value_types}\nremarks{remarks}")
         for i, v in enumerate(values):
             name = v
             ftyle = self.hand_t(value_types[i])
@@ -198,7 +198,7 @@ class MarkDownParser(object):
             return 'uint64'
         if x == 'systemParam':
             return 'uint8'
-        raise Exception(f"未知的类型参数 {x}")
+        raise Exception(f"结构体解析错误，类型判断1失败，未知的类型参数 {x}")
 
     # 类型转化2
     def value_type_trans(self, x: str):
@@ -220,7 +220,7 @@ class MarkDownParser(object):
             return 'uint64Ty'
         if x == 'systemParam':
             return 'uint8Ty'
-        return 'UNKNOWN2'
+        raise Exception(f"事件解析器生成失败，类型判断2错误，未知的类型参数 {x}")
 
     # 处理event 组
     def handle_event_group(self, group_name: str, buff: list, **kwargs):
@@ -305,12 +305,12 @@ def handle():
         success("解析成功！")
         show_result(results)
     except Exception as e:
-        fail(str(e), dur=6)
+        fail(str(e), dur=8)
 
 
 def md2go():
     put_info(
-        "说明:\n1. 上传指定格式md文件，解析成go源码\n2. 解析后生成事件结构体、事件组路由器、事件处理器三部分\n3. 升级：支持无序字符\n 点击下载可下载go文件到本地")
+        "说明:\n1. 本工具将合约事件文件解析成go源代码\n2. 解析后生成事件结构体、事件组路由器、事件处理器三部分\n3. md文件由合约开发者提供，请使用统一规范\n4. 点击下载可下载go文件到本地")
     put_input(name='pack_name', type='text', label='包名', value='serve_pve',
               help_text='生成go文件对应的包名')
     put_input(name='class_name', type='text', label='方法的接收指针', value='ParsePveTask',
