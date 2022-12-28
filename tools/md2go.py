@@ -90,7 +90,7 @@ class MarkDownParser(object):
         lk = '{'
         rk = '}'
         result = (
-            f'func (task *{class_name}) handle{group_name}Event(event model.{raw_model}) {lk} \n'
+            f'func (task *{class_name}) handle{group_name}Event(event {raw_model}) {lk} \n'
             f'   itype := event.Itype\n'
             f'   sender := event.Sender\n'
             f'   log.DebugF("%s handle {group_name} Event group Sender:%s IType:%d", task.Tag(), sender, itype)\n'
@@ -142,8 +142,8 @@ class MarkDownParser(object):
         # vs = ','.join(list(map(value_trans, values)))
         vts = ','.join(list(map(self.value_type_trans, value_types)))
         result = (
-            f'func (task *{class_name}) parse{group_name}{event_name}(event model.{raw_model}) {lk}\n'
-            f'   values, err := task.geneArgument({vts}).Unpack(event.BValue)\n'
+            f'func (task *{class_name}) parse{group_name}{event_name}(event {raw_model}) {lk}\n'
+            f'   values, err := task.geneArgument({vts}).Unpack(event.Bvalue)\n'
             f'   if err != nil {lk}\n'
             f'       log.Error(task.Tag(), err.Error())\n'
             f'       return\n'
@@ -207,7 +207,7 @@ class MarkDownParser(object):
         if x == 'uint256':
             return 'uint256Ty'
         if x == 'int256':
-            return 'uint256Ty'
+            return 'int256Ty'
         if x == 'uint8':
             return 'uint8Ty'
         if x == 'uint16':
@@ -311,11 +311,11 @@ def handle():
 def md2go():
     put_info(
         "说明:\n1. 本工具将合约事件文件解析成go源代码\n2. 解析后生成事件结构体、事件组路由器、事件处理器三部分\n3. md文件由合约开发者提供，请使用统一规范\n4. 点击下载可下载go文件到本地")
-    put_input(name='pack_name', type='text', label='包名', value='serve_pve',
+    put_input(name='pack_name', type='text', label='包名', value='demo',
               help_text='生成go文件对应的包名')
-    put_input(name='class_name', type='text', label='方法的接收指针', value='ParsePveTask',
+    put_input(name='class_name', type='text', label='方法的接收指针', value='DemoTask',
               help_text='任务结构体名称')
-    put_input(name='raw_model', type='text', value='PveRaw', label='原始数据来源',
+    put_input(name='raw_model', type='text', value='*pb.EventFilterReply_RawEvent', label='原始数据来源',
               help_text='存储原始event数据的结构体名称')
 
     put_checkbox(name='enable', options=[
