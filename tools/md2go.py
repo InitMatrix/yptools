@@ -9,6 +9,8 @@ import pywebio.input
 from pywebio.output import *
 from pywebio.pin import *
 
+NILS = ['nil', 'None', 'none', 'empty', 'false']
+
 
 def fail(msg: str, dur=4):
     toast(content=msg, duration=dur, color='red')
@@ -70,12 +72,31 @@ class MarkDownParser(object):
     def split_line(self, line: str) -> (str, int, list, list):
         ls = list(filter(lambda x: x != '',
                          line.replace(" ", "").replace("\n", "").replace('，', ',').replace('\\', '').split('|')))
+        # ls = line.replace(' ', '').replace('\n', '').replace('，', ',').replace('\\', '').split('|')
         if len(ls) < 4:
             return None
+        # 1 获取event 名称
         event_name = ls[0]
+        # 2 获取event 相关itype
         type_id = int(ls[1].replace(' ', ''))
-        values = [a.replace('_', '')[0].upper() + a.replace('_', '')[1:] for a in ls[2].split(',')]
-        value_types = ls[3].split(',')
+
+        # 3 获取values 数组
+        values = []
+        for a in ls[2].split(','):
+            if a and a.lower() not in NILS:
+                values.append(a.replace('_', '')[0].upper() + a.replace('_', '')[1:])
+
+        # 4 获取values type 数组
+        value_types = []
+        for b in ls[3].split(','):
+            if b and b.lower() not in NILS:
+                value_types.append(b)
+        if len(value_types) != len(values):
+            raise Exception(f"value长度和type长度不一致,line: {line} L1={len(value_types)} L2{len(values)}")
+        if not event_name:
+            raise Exception(f"无法识别的EventName: {event_name} Line:{line}")
+        if not type_id:
+            raise Exception(f"无法识别的Itype: {type_id} Line:{line}")
         if len(ls) == 5:
             remarks = [a.replace('_', '')[0].upper() + a.replace('_', '')[1:] for a in ls[4].split(',')]
         else:
@@ -114,22 +135,23 @@ class MarkDownParser(object):
     # 生成event 结构体
     # noinspection PyShadowingNames
     def gen_struct(self, group_name, line) -> str:
-        event_name, type_id, values, value_types, remarks = self.split_line(line)
-        lk = '{'
-        rk = '}'
-        result = (
-            f'type {group_name}{event_name} struct {lk}\n'
-        )
-        if len(values) != len(value_types):
-            raise Exception(
-                f"结构体解析失败:group:{group_name}\n event:{event_name}\nvalues:{values}\nvalue_types{value_types}\nremarks{remarks}")
-        for i, v in enumerate(values):
-            name = v
-            ftyle = self.hand_t(value_types[i])
-            remark = remarks[i] if i < len(remarks) else ''
-            result += f'  {name} {ftyle} // {remark}\n'
-        result += f'{rk}\n'
-        return result
+        try:
+            event_name, type_id, values, value_types, remarks = self.split_line(line)
+            lk = '{'
+            rk = '}'
+            result = (
+                f'type {group_name}{event_name} struct {lk}\n'
+            )
+
+            for i, v in enumerate(values):
+                name = v
+                ftyle = self.hand_t(value_types[i])
+                remark = remarks[i] if i < len(remarks) else ''
+                result += f'  {name} {ftyle} // {remark}\n'
+            result += f'{rk}\n'
+            return result
+        except Exception as e:
+            raise Exception(f"生成结构体失败:{str(e)} line:{line}")
 
     # 3生成单事件解析器
     def gen_parse(self, group_name, line):
@@ -140,22 +162,29 @@ class MarkDownParser(object):
         rk = '}'
         event_name, type_id, values, value_types, remarks = self.split_line(line)
         # vs = ','.join(list(map(value_trans, values)))
-        vts = ','.join(list(map(self.value_type_trans, value_types)))
-        result = (
-            f'func (task *{class_name}) parse{group_name}{event_name}(event {raw_model}) {lk}\n'
-            f'   values, err := task.geneArgument({vts}).Unpack(event.Bvalue)\n'
-            f'   if err != nil {lk}\n'
-            f'       log.Error(task.Tag(), err.Error())\n'
-            f'       return\n'
-            f'   {rk}\n'
-            f'   log.Debug(task.Tag(), event.BlockNumber, "find event: {group_name} {event_name}", values)\n'
-            f'   var receive = {group_name}{event_name}{lk}\n'
-            # f'       PoolToken:      values[0].(common.Address).String(),\n'
-            # f'       DepositManager: values[1].(common.Address).String(),\n'
-            # f'   {rk}\n'
-            # f'task.saveEvent(event, receive)\n'
-            # f'{rk}\n'
-        )
+        if len(values) == 0 or len(value_types) == 0:
+            result = (
+                f'func (task *{class_name}) parse{group_name}{event_name}(event {raw_model}) {lk}\n'
+                f'   log.Debug(task.Tag(), event.BlockNumber, "find event: {group_name} {event_name}", "nil values")\n'
+                f'   var receive = {group_name}{event_name}{lk}\n'
+            )
+        else:
+            vts = ','.join(list(map(self.value_type_trans, value_types)))
+            result = (
+                f'func (task *{class_name}) parse{group_name}{event_name}(event {raw_model}) {lk}\n'
+                f'   values, err := task.geneArgument({vts}).Unpack(event.Bvalue)\n'
+                f'   if err != nil {lk}\n'
+                f'       log.Error(task.Tag(), err.Error())\n'
+                f'       return\n'
+                f'   {rk}\n'
+                f'   log.Debug(task.Tag(), event.BlockNumber, "find event: {group_name} {event_name}", values)\n'
+                f'   var receive = {group_name}{event_name}{lk}\n'
+                # f'       PoolToken:      values[0].(common.Address).String(),\n'
+                # f'       DepositManager: values[1].(common.Address).String(),\n'
+                # f'   {rk}\n'
+                # f'task.saveEvent(event, receive)\n'
+                # f'{rk}\n'
+            )
         for i, v in enumerate(values):
             result += f'       {v}:      values[{i}].{self.get_t(value_types[i])},\n'
         # return f"// {sufix}{upper(event_name)} :\ntype {sufix}{upper(event_name)} struct {lk}\n    {fff}{rk}\n"
@@ -232,23 +261,27 @@ class MarkDownParser(object):
         if self.enable_struct:
             for line in buff:
                 data1 = self.gen_struct(group_name, line)
-                result += data1
+                if data1:
+                    result += data1
 
         if self.enable_route:
             # 2 生成handle router 单个
             data2 = self.gen_router(group_name, buff)
-            result += data2
+            if data2:
+                result += data2
 
         if self.enable_event_parse:
             # 3 生成解析event方法 多个
             for line in buff:
                 data3 = self.gen_parse(group_name, line)
-                result += data3
+                if data3:
+                    result += data3
         if self.enable_save_func:
             # 3 生成解析event方法 多个
             for line in buff:
                 data4 = self.gen_save(group_name, line)
-                result += data4
+                if data4:
+                    result += data4
         return result
 
     def parse(self, file: str) -> list:
