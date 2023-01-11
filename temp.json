@@ -1,0 +1,206 @@
+{
+  "Factory": [
+    {
+      "event_name": "CreatePool",
+      "itype": 1,
+      "remarks": [
+        "Pool地址",
+        "Token0地址",
+        "Token1地址"
+      ],
+      "value": [
+        "Pool",
+        "Token0",
+        "Token1"
+      ],
+      "value_type": [
+        "address",
+        "address",
+        "address"
+      ]
+    }
+  ],
+  "Pool": [
+    {
+      "event_name": "Construct",
+      "itype": 1,
+      "remarks": [],
+      "value": [
+        "Lp",
+        "SideLp0",
+        "SideLp1"
+      ],
+      "value_type": [
+        "address",
+        "address",
+        "address"
+      ]
+    },
+    {
+      "event_name": "Initialize",
+      "itype": 2,
+      "remarks": [],
+      "value": [
+        "Amount0",
+        "Amount1",
+        "Liquidity"
+      ],
+      "value_type": [
+        "uint256",
+        "uint256",
+        "uint256"
+      ]
+    },
+    {
+      "event_name": "AddLiquidity",
+      "itype": 3,
+      "remarks": [],
+      "value": [
+        "Amount0",
+        "Amount1",
+        "Liquidity"
+      ],
+      "value_type": [
+        "uint256",
+        "uint256",
+        "uint256"
+      ]
+    },
+    {
+      "event_name": "RemoveLiquidity",
+      "itype": 4,
+      "remarks": [],
+      "value": [
+        "Amount0",
+        "Amount1",
+        "Liquidity"
+      ],
+      "value_type": [
+        "uint256",
+        "uint256",
+        "uint256"
+      ]
+    },
+    {
+      "event_name": "AddSideLiquidity",
+      "itype": 5,
+      "remarks": [],
+      "value": [
+        "Amount",
+        "SideAmount"
+      ],
+      "value_type": [
+        "int256",
+        "uint256"
+      ]
+    },
+    {
+      "event_name": "RemoveSideLiquidity",
+      "itype": 6,
+      "remarks": [],
+      "value": [
+        "Amount",
+        "SideAmount"
+      ],
+      "value_type": [
+        "int256",
+        "uint256"
+      ]
+    },
+    {
+      "event_name": "Exchange",
+      "itype": 7,
+      "remarks": [],
+      "value": [
+        "Amount",
+        "AmountOut",
+        "Fee"
+      ],
+      "value_type": [
+        "int256",
+        "uint256",
+        "int256"
+      ]
+    },
+    {
+      "event_name": "OpenPosition",
+      "itype": 8,
+      "remarks": [],
+      "value": [
+        "Sender",
+        "PositionIndex",
+        "Margin",
+        "Amount"
+      ],
+      "value_type": [
+        "address",
+        "uint64",
+        "int256",
+        "int256"
+      ]
+    },
+    {
+      "event_name": "ClosePosition",
+      "itype": 9,
+      "remarks": [],
+      "value": [
+        "PID"
+      ],
+      "value_type": [
+        "uint64"
+      ]
+    },
+    {
+      "event_name": "Liquidate",
+      "itype": 10,
+      "remarks": [],
+      "value": [
+        "PID"
+      ],
+      "value_type": [
+        "uint64"
+      ]
+    },
+    {
+      "event_name": "Rebase",
+      "itype": 11,
+      "remarks": [],
+      "value": [],
+      "value_type": []
+    }
+  ],
+  "QLP": [
+    {
+      "event_name": "Mint",
+      "itype": 1,
+      "remarks": [
+        "用户地址",
+        "增发数量"
+      ],
+      "value": [
+        "User",
+        "Amount"
+      ],
+      "value_type": [
+        "address",
+        "uint256"
+      ]
+    },
+    {
+      "event_name": "Burn",
+      "itype": 2,
+      "remarks": [
+        "用户地址",
+        "销毁数量"
+      ],
+      "value": [
+        "User",
+        "Amount"
+      ],
+      "value_type": [
+        "address",
+        "uint256"
+      ]
+    }
+  ]
+}
